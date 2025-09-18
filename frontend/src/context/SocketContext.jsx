@@ -31,13 +31,21 @@ export const SocketProvider = ({ children }) => {
     try {
       console.log('🔌 Initializing Socket.IO connection...');
       
+      // Determine server URL based on environment
       let serverUrl;
-      try {
-        serverUrl = import.meta.env?.VITE_SERVER_URL || 'http://localhost:3001';
-      } catch (error) {
-        console.warn('Failed to read environment variable, using default:', error);
+      
+      // Check if we're in production (deployed)
+      const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+      
+      if (isProduction) {
+        // Production: Use environment variable or fallback to your Render backend URL
+        serverUrl = import.meta.env?.VITE_SERVER_URL || 'https://your-backend-app.onrender.com';
+      } else {
+        // Development: Use localhost
         serverUrl = 'http://localhost:3001';
       }
+      
+      console.log('🌐 Environment:', isProduction ? 'Production' : 'Development');
       console.log('🌐 Connecting to server:', serverUrl);
       
       const newSocket = io(serverUrl, {

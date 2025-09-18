@@ -13,10 +13,23 @@ class AnalyticsManager {
       networkTimes: {}
     };
     
-    // Backend API URL
-    this.apiBaseUrl = 'http://localhost:3001';
+    // Backend API URL - dynamically determined
+    this.apiBaseUrl = this.getApiBaseUrl();
     
     this.init();
+  }
+
+  getApiBaseUrl() {
+    // Check if we're in production (deployed)
+    const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+    
+    if (isProduction) {
+      // Production: Use environment variable or fallback to your Render backend URL
+      return import.meta.env?.VITE_SERVER_URL || 'https://your-backend-app.onrender.com';
+    } else {
+      // Development: Use localhost
+      return 'http://localhost:3001';
+    }
   }
 
   init() {

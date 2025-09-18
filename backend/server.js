@@ -1,5 +1,6 @@
 const http = require('http');
 const express = require('express');
+const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
@@ -32,7 +33,12 @@ const server = http.createServer(app);
 
 // CORS configuration
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+  origin: [
+    "http://localhost:5173", 
+    "http://127.0.0.1:5173",
+    "https://gamblingapp.netlify.app", // Replace with your actual Netlify URL
+    "https://your-frontend-domain.netlify.app" // Add your actual Netlify domain
+  ],
   methods: ["GET", "POST"],
   credentials: true
 };
