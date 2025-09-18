@@ -1,0 +1,43 @@
+{
+  "name": "Gambling Platform",
+  "short_name": "GamblePlatform",
+  "description": "Professional gambling platform with 9 games, provably fair gaming, and real-time features",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/vite.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Play Mines",
+      "short_name": "Mines",
+      "description": "Play the Mines game",
+      "url": "/games/mines",
+      "icons": [{ "src": "/vite.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your gaming dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "/vite.svg", "sizes": "192x192" }]
+    }
+  ]
+}

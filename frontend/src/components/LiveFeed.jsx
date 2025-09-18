@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Users, Clock } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
+import '../styles/game-placeholders.css';
 
 const LiveFeed = () => {
   const [wins, setWins] = useState([]);
+  const [failedImages, setFailedImages] = useState(new Set());
   const { socket } = useSocket();
 
   useEffect(() => {
@@ -55,6 +57,36 @@ const LiveFeed = () => {
     return gameIcons[game] || '🎰';
   };
 
+  const getGameImage = (game) => {
+    const gameImages = {
+      mines: '/images/games/mines.png',
+      coinflip: '/images/games/coinflip.png',
+      limbo: '/images/games/limbo.png',
+      crash: '/images/games/crash.png',
+      upgrader: '/images/games/upgrader.png',
+      'murder-mystery': '/images/games/murder-mystery.png',
+      dice: '/images/games/dice.png',
+      plinko: '/images/games/plinko.png',
+      towers: '/images/games/towers.png'
+    };
+    return gameImages[game];
+  };
+
+  const getGameClass = (game) => {
+    const gameClasses = {
+      mines: 'mines',
+      coinflip: 'coinflip',
+      limbo: 'limbo',
+      crash: 'crash',
+      upgrader: 'upgrader',
+      'murder-mystery': 'murder-mystery',
+      dice: 'dice',
+      plinko: 'plinko',
+      towers: 'towers'
+    };
+    return gameClasses[game] || 'default';
+  };
+
   if (wins.length === 0) {
     return (
       <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-slate-700">
@@ -91,8 +123,21 @@ const LiveFeed = () => {
               className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg border border-slate-600"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center text-sm">
-                  {getGameIcon(win.game)}
+                <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
+                  {getGameImage(win.game) && !failedImages.has(win.game) ? (
+                    <img 
+                      src={getGameImage(win.game)} 
+                      alt={win.game}
+                      className="w-full h-full object-cover"
+                      onError={() => {
+                        setFailedImages(prev => new Set(prev).add(win.game));
+                      }}
+                    />
+                  ) : (
+                    <div className={`w-8 h-8 game-image-placeholder ${getGameClass(win.game)} rounded-lg flex items-center justify-center text-sm`}>
+                      {getGameIcon(win.game)}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">

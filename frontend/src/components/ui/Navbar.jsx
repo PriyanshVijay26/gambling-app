@@ -14,67 +14,73 @@ import {
   Coins,
   Dice6,
   Triangle,
-  Building2
+  Building2,
+  Users,
+  Settings,
+  BarChart3,
+  Gift
 } from 'lucide-react';
 import { useSocket } from '../../context/SocketContext';
-import GuestAuthModal from '../GuestAuthModal';
+import '../../styles/game-placeholders.css';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [failedImages, setFailedImages] = useState(new Set());
   const location = useLocation();
-  const { connected, user } = useSocket();
-  const [authOpen, setAuthOpen] = useState(false);
+  const { connected, user, setAuthModalOpen } = useSocket();
 
   const navigation = [
     { name: 'Home', href: '/', icon: Home },
+    { name: 'Cases', href: '/cases', icon: Gift },
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Statistics', href: '/stats', icon: BarChart3 },
+    { name: 'Settings', href: '/settings', icon: Settings },
   ];
 
   const games = [
-    { name: 'Mines', href: '/games/mines', icon: Bomb, color: 'text-red-400' },
-    { name: 'Coin Flip', href: '/games/coinflip', icon: Coins, color: 'text-yellow-400' },
-    { name: 'Limbo', href: '/games/limbo', icon: TrendingUp, color: 'text-green-400' },
-    { name: 'Crash', href: '/games/crash', icon: Zap, color: 'text-orange-400' },
-    { name: 'Upgrader', href: '/games/upgrader', icon: Target, color: 'text-purple-400' },
-    { name: 'Murder Mystery', href: '/games/murder-mystery', icon: Gamepad2, color: 'text-pink-400' },
-    { name: 'Dice', href: '/games/dice', icon: Dice6, color: 'text-blue-400' },
-    { name: 'Plinko', href: '/games/plinko', icon: Triangle, color: 'text-indigo-400' },
-    { name: 'Towers', href: '/games/towers', icon: Building2, color: 'text-emerald-400' },
+    { name: 'Mines', href: '/games/mines', icon: Bomb, color: 'text-red-400', image: '/images/games/mines.png', className: 'mines' },
+    { name: 'Enhanced Mines', href: '/enhanced-mines', icon: Bomb, color: 'text-red-500', image: '/images/games/mines.png', className: 'mines' },
+    { name: 'Coin Flip', href: '/games/coinflip', icon: Coins, color: 'text-yellow-400', image: '/images/games/coinflip.png', className: 'coinflip' },
+    { name: 'Limbo', href: '/games/limbo', icon: TrendingUp, color: 'text-green-400', image: '/images/games/limbo.png', className: 'limbo' },
+    { name: 'Crash', href: '/games/crash', icon: Zap, color: 'text-orange-400', image: '/images/games/crash.png', className: 'crash' },
+    { name: 'Upgrader', href: '/games/upgrader', icon: Target, color: 'text-purple-400', image: '/images/games/upgrader.png', className: 'upgrader' },
+    { name: 'Murder Mystery', href: '/games/murder-mystery', icon: Gamepad2, color: 'text-pink-400', image: '/images/games/murder-mystery.png', className: 'murder-mystery' },
+    { name: 'Dice', href: '/games/dice', icon: Dice6, color: 'text-blue-400', image: '/images/games/dice.png', className: 'dice' },
+    { name: 'Plinko', href: '/games/plinko', icon: Triangle, color: 'text-indigo-400', image: '/images/games/plinko.png', className: 'plinko' },
+    { name: 'Towers', href: '/games/towers', icon: Building2, color: 'text-emerald-400', image: '/images/games/towers.png', className: 'towers' },
   ];
 
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="bg-dark-200 border-b border-slate-700 sticky top-0 z-50 backdrop-blur-md">
+    <nav className="bg-black/90 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-20">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                <Gamepad2 className="w-5 h-5 text-white" />
+            <Link to="/" className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <Gamepad2 className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold text-gradient">
                 GamePlatform
               </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-2">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                    isActive(item.href)
-                      ? 'bg-primary-600 text-white'
-                      : 'text-gray-300 hover:text-white hover:bg-slate-700'
+                  className={`nav-item flex items-center space-x-2 ${
+                    isActive(item.href) ? 'active' : ''
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-5 h-5" />
                   <span className="font-medium">{item.name}</span>
                 </Link>
               );
@@ -82,26 +88,26 @@ const Navbar = () => {
 
             {/* Games Dropdown */}
             <div className="relative group">
-              <button className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-slate-700 transition-all duration-200">
-                <Gamepad2 className="w-4 h-4" />
+              <button className="nav-item flex items-center space-x-2">
+                <Gamepad2 className="w-5 h-5" />
                 <span className="font-medium">Games</span>
               </button>
               
-              <div className="absolute top-full left-0 mt-2 w-56 bg-dark-200 border border-slate-700 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="p-2">
+              <div className="absolute top-full left-0 mt-2 w-64 bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                <div className="p-3">
                   {games.map((game) => {
                     const Icon = game.icon;
                     return (
                       <Link
                         key={game.name}
                         to={game.href}
-                        className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+                        className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                           isActive(game.href)
-                            ? 'bg-primary-600 text-white'
-                            : 'text-gray-300 hover:text-white hover:bg-slate-700'
+                            ? 'bg-blue-600/20 border border-blue-500/30 text-white'
+                            : 'text-gray-300 hover:text-white hover:bg-white/10'
                         }`}
                       >
-                        <Icon className={`w-4 h-4 ${game.color}`} />
+                        <Icon className={`w-5 h-5 ${game.color}`} />
                         <span className="font-medium">{game.name}</span>
                       </Link>
                     );
@@ -111,21 +117,24 @@ const Navbar = () => {
             </div>
 
             {/* Connection Status */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-2">
               <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-gray-300">
                 {connected ? 'Connected' : 'Disconnected'}
               </span>
             </div>
 
             {/* Guest Auth */}
-            <button onClick={()=>setAuthOpen(true)} className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-slate-700">
+            <button 
+              onClick={() => setAuthModalOpen(true)} 
+              className="flex items-center gap-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+            >
               {user?.avatar ? (
-                <img src={user.avatar} alt="avatar" className="w-6 h-6 rounded" />
+                <img src={user.avatar} alt="avatar" className="w-8 h-8 rounded-lg" />
               ) : (
-                <div className="w-6 h-6 bg-slate-700 rounded" />
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg" />
               )}
-              <span className="text-sm">{user?.username || 'Set username'}</span>
+              <span className="font-medium">{user?.username || 'Set username'}</span>
             </button>
           </div>
 
@@ -190,7 +199,6 @@ const Navbar = () => {
           </div>
         </div>
       </motion.div>
-      <GuestAuthModal open={authOpen} onClose={()=>setAuthOpen(false)} />
     </nav>
   );
 };

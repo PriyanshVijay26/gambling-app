@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { io } from 'socket.io-client';
 
 const SocketContext = createContext();
@@ -14,52 +14,153 @@ export const useSocket = () => {
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [connected, setConnected] = useState(false);
+  const [error, setError] = useState(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [user, setUser] = useState(() => {
     try {
-      const raw = localStorage.getItem('guestUser');
-      return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
+      const saved = localStorage?.getItem('guestUser');
+      return saved ? JSON.parse(saved) : null;
+    } catch (error) {
+      console.error('Failed to load user data:', error);
+      return null;
+    }
   });
 
+  // Initialize socket connection
   useEffect(() => {
-    // Initialize socket connection
-    const newSocket = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:3001', {
-      transports: ['websocket']
-    });
+    try {
+      console.log('🔌 Initializing Socket.IO connection...');
+      
+      let serverUrl;
+      try {
+        serverUrl = import.meta.env?.VITE_SERVER_URL || 'http://localhost:3001';
+      } catch (error) {
+        console.warn('Failed to read environment variable, using default:', error);
+        serverUrl = 'http://localhost:3001';
+      }
+      console.log('🌐 Connecting to server:', serverUrl);
+      
+      const newSocket = io(serverUrl, {
+        transports: ['polling', 'websocket'],
+        timeout: 20000,
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        maxHttpBufferSize: 1e8,
+        autoConnect: true,
+        forceNew: false,
+      });
 
-    newSocket.on('connect', () => {
-      console.log('Connected to server');
-      setConnected(true);
-    });
+      // Connection events
+      newSocket.on('connect', () => {
+        console.log('✅ Socket connected:', newSocket.id);
+        console.log('🚀 Transport:', newSocket.io.engine.transport.name);
+        setConnected(true);
+        setError(null);
+      });
 
-    newSocket.on('disconnect', () => {
-      console.log('Disconnected from server');
-      setConnected(false);
-    });
+      newSocket.on('disconnect', (reason) => {
+        console.log('❌ Socket disconnected:', reason);
+        setConnected(false);
+        
+        if (reason === 'io server disconnect') {
+          newSocket.connect();
+        }
+      });
 
-    newSocket.on('error', (error) => {
-      console.error('Socket error:', error);
-    });
+      newSocket.on('connect_error', (error) => {
+        console.error('🚫 Socket connection error:', error.message);
+        console.error('🔍 Error details:', error);
+        setConnected(false);
+        setError(error.message);
+      });
 
-  setSocket(newSocket);
+      newSocket.on('reconnect', (attemptNumber) => {
+        console.log('🔄 Socket reconnected after', attemptNumber, 'attempts');
+        setConnected(true);
+        setError(null);
+      });
 
-    return () => {
-      newSocket.close();
-    };
+      newSocket.on('reconnect_attempt', (attemptNumber) => {
+        console.log('🔄 Reconnection attempt', attemptNumber);
+      });
+
+      newSocket.on('reconnect_error', (error) => {
+        console.error('🚫 Reconnection failed:', error.message);
+        setError(`Reconnection failed: ${error.message}`);
+      });
+
+      newSocket.on('reconnect_failed', () => {
+        console.error('💀 Reconnection failed permanently');
+        setError('Connection failed permanently');
+      });
+
+      newSocket.io.on('upgrade', () => {
+        console.log('⬆️ Transport upgraded to:', newSocket.io.engine.transport.name);
+      });
+
+      newSocket.io.on('upgradeError', (error) => {
+        console.warn('⚠️ Transport upgrade failed:', error);
+      });
+
+      newSocket.on('test:pong', (data) => {
+        console.log('🏓 Pong received:', data);
+      });
+
+      setSocket(newSocket);
+
+      return () => {
+        console.log('🧹 Cleaning up socket connection...');
+        if (newSocket) {
+          newSocket.close();
+        }
+      };
+    } catch (error) {
+      console.error('🔥 Fatal error initializing socket:', error);
+      setError(`Fatal error: ${error.message}`);
+    }
   }, []);
 
-  const value = {
+  // User management
+  const updateUser = useCallback((userData) => {
+    setUser(userData);
+    try {
+      localStorage.setItem('guestUser', JSON.stringify(userData));
+    } catch (error) {
+      console.error('Failed to save user data:', error);
+    }
+  }, []);
+
+  // Test connection function
+  const testConnection = useCallback(() => {
+    if (socket?.connected) {
+      console.log('🧪 Testing connection...');
+      socket.emit('test:ping', { 
+        timestamp: Date.now(),
+        message: 'Hello from frontend!' 
+      });
+      return true;
+    } else {
+      console.error('❌ Cannot test - socket not connected');
+      return false;
+    }
+  }, [socket]);
+
+  const contextValue = {
     socket,
     connected,
     user,
-    setUser: (u) => {
-      setUser(u);
-      try { localStorage.setItem('guestUser', JSON.stringify(u)); } catch {}
-    }
+    setUser: updateUser,
+    updateUser,
+    testConnection,
+    error,
+    authModalOpen,
+    setAuthModalOpen,
   };
 
   return (
-    <SocketContext.Provider value={value}>
+    <SocketContext.Provider value={contextValue}>
       {children}
     </SocketContext.Provider>
   );

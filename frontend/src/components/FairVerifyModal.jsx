@@ -18,7 +18,13 @@ export default function FairVerifyModal({ open, onClose, fair, game, autoServerS
       const side = verifyCoinFlip({ serverSeed, clientSeed: fair.clientSeed, nonce: fair.nonce });
       setResult({ ok: true, computed: side });
     } else if (game?.type === 'mines') {
-      const mines = verifyMines({ serverSeed, clientSeed: fair.clientSeed, nonce: fair.nonce, mineCount: game.mineCount });
+      const mines = verifyMines({ 
+        serverSeed, 
+        clientSeed: fair.clientSeed, 
+        nonce: fair.nonce, 
+        mineCount: game.mineCount,
+        gridSize: game.gridSize || 5
+      });
       setResult({ ok: true, computed: mines });
     } else {
       setResult({ ok: false, error: 'Unsupported game' });

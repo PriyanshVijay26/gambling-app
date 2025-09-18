@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Socket.IO Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: white; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .connected { background: #2d5a2d; border: 1px solid #4a8a4a; }
+        .disconnected { background: #5a2d2d; border: 1px solid #8a4a4a; }
+        .logs { background: #2a2a2a; padding: 10px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; }
+        button { padding: 10px 20px; margin: 5px; background: #4a8a4a; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #5a9a5a; }
+        button:disabled { background: #666; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h1>Socket.IO Connection Test</h1>
+    
+    <div id="status" class="status disconnected">
+        Status: Disconnected
+    </div>
+    
+    <div>
+        <button onclick="testConnection()">Test Connection</button>
+        <button onclick="testMinesGame()">Test Mines Game</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <h3>Connection Logs:</h3>
+    <div id="logs" class="logs"></div>
+    
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script>
+        let socket = null;
+        let connected = false;
+        
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${timestamp}] ${message}\\n`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus() {
+            const statusEl = document.getElementById('status');
+            if (connected) {
+                statusEl.textContent = `Status: Connected (${socket.id})`;
+                statusEl.className = 'status connected';
+            } else {
+                statusEl.textContent = 'Status: Disconnected';
+                statusEl.className = 'status disconnected';
+            }
+        }
+        
+        function initSocket() {
+            log('🔌 Initializing Socket.IO connection...');
+            
+            socket = io('http://localhost:3001', {
+                transports: ['polling', 'websocket'],
+                timeout: 20000,
+                reconnection: true,
+                reconnectionAttempts: 10,
+                reconnectionDelay: 1000
+            });
+            
+            socket.on('connect', () => {
+                log(`✅ Connected: ${socket.id}`);
+                log(`🚀 Transport: ${socket.io.engine.transport.name}`);
+                connected = true;
+                updateStatus();
+            });
+            
+            socket.on('disconnect', (reason) => {
+                log(`❌ Disconnected: ${reason}`);
+                connected = false;
+                updateStatus();
+            });
+            
+            socket.on('connect_error', (error) => {
+                log(`🚫 Connection error: ${error.message}`);
+                connected = false;
+                updateStatus();
+            });
+            
+            socket.on('reconnect', (attempt) => {
+                log(`🔄 Reconnected after ${attempt} attempts`);
+                connected = true;
+                updateStatus();
+            });
+            
+            socket.io.on('upgrade', () => {
+                log(`⬆️ Upgraded to: ${socket.io.engine.transport.name}`);
+            });
+            
+            // Game event handlers
+            socket.on('mines:gameState', (data) => {
+                log(`🎮 Received game state: ${JSON.stringify(data)}`);
+            });
+            
+            socket.on('test:pong', (data) => {
+                log(`🏓 Pong: ${JSON.stringify(data)}`);
+            });
+            
+            socket.on('error', (error) => {
+                log(`❌ Server error: ${error.message}`);
+            });
+        }
+        
+        function testConnection() {
+            if (socket && connected) {
+                log('🧪 Testing ping...');
+                socket.emit('test:ping', { message: 'Hello from test page!', timestamp: Date.now() });
+            } else {
+                log('❌ Not connected');
+            }
+        }
+        
+        function testMinesGame() {
+            if (socket && connected) {
+                log('🎮 Testing mines game...');
+                socket.emit('mines:startGame', {
+                    betAmount: 10,
+                    mineCount: 3,
+                    gridSize: 5
+                });
+            } else {
+                log('❌ Not connected');
+            }
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        // Initialize on page load
+        window.onload = () => {
+            initSocket();
+            updateStatus();
+        };
+    </script>
+</body>
+</html>

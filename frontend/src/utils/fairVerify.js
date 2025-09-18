@@ -24,11 +24,12 @@ export function verifyCoinFlip({ serverSeed, clientSeed, nonce }) {
   return rng() > 0.5 ? 'heads' : 'tails';
 }
 
-export function verifyMines({ serverSeed, clientSeed, nonce, mineCount }) {
+export function verifyMines({ serverSeed, clientSeed, nonce, mineCount, gridSize = 5 }) {
   const rng = rngFactory(serverSeed, clientSeed, nonce);
   const mines = new Set();
+  const gridLength = gridSize * gridSize;
   while (mines.size < mineCount) {
-    mines.add(Math.floor(rng(mines.size) * 25));
+    mines.add(Math.floor(rng(mines.size) * gridLength));
   }
   return Array.from(mines);
 }

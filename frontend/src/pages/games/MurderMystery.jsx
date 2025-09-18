@@ -1,7 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Gamepad2, Users, Clock, Sword, Shield, Eye } from 'lucide-react';
 import { useSocket } from '../../context/SocketContext';
+
+// Isometric dot pattern background
+const IsometricDotBackground = () => {
+  const dotSize = 2;
+  const spacing = 20;
+  
+  return (
+    <div className="absolute inset-0 overflow-hidden" style={{ zIndex: 1 }}>
+      <svg 
+        width="100%" 
+        height="100%" 
+        className="absolute inset-0"
+        style={{ background: '#000000' }}
+      >
+        <defs>
+          <pattern id="mmIsometricDots" x="0" y="0" width={spacing} height={spacing} patternUnits="userSpaceOnUse">
+            <circle 
+              cx={spacing/2} 
+              cy={spacing/2} 
+              r={dotSize/2} 
+              fill="rgba(255,255,255,0.1)" 
+            />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#mmIsometricDots)" />
+        
+        {/* Additional isometric grid lines */}
+        <defs>
+          <pattern id="mmIsometricGrid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path 
+              d="M 0 20 L 20 0 L 40 20 L 20 40 Z" 
+              fill="none" 
+              stroke="rgba(236, 72, 153, 0.1)" 
+              strokeWidth="0.5"
+            />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#mmIsometricGrid)" />
+      </svg>
+    </div>
+  );
+};
 
 const MurderMystery = () => {
   const [gameState, setGameState] = useState('lobby'); // lobby, waiting, playing, finished
@@ -86,43 +128,128 @@ const MurderMystery = () => {
           <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-700 rounded-xl flex items-center justify-center mx-auto mb-4">
             <Gamepad2 className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">Murder Mystery</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">🕵️‍♂️ Murder Mystery</h1>
           <p className="text-gray-400 text-lg">Roblox-inspired P2P battles with roles and strategy</p>
         </motion.div>
 
         {/* Game Lobby */}
         {gameState === 'lobby' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-xl border border-slate-700 text-center"
-          >
-            <h2 className="text-2xl font-bold text-white mb-4">Join a Game</h2>
-            <p className="text-gray-400 mb-6">
-              Enter the lobby and get assigned a role. Work with or against other players to achieve your objective.
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {Object.entries(roles).map(([key, role]) => {
-                const Icon = role.icon;
-                return (
-                  <div key={key} className="bg-slate-700/50 p-4 rounded-lg">
-                    <Icon className={`w-8 h-8 ${role.color} mx-auto mb-2`} />
-                    <h3 className="text-white font-bold mb-1">{role.name}</h3>
-                    <p className="text-gray-400 text-sm">{role.description}</p>
-                  </div>
-                );
-              })}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Game Visualization */}
+            <div className="lg:col-span-2">
+              <div 
+                className="relative rounded-xl border-2 border-slate-600 overflow-hidden"
+                style={{ 
+                  height: '400px',
+                  background: '#000000',
+                  boxShadow: '0 0 40px rgba(236, 72, 153, 0.2), inset 0 0 40px rgba(0, 0, 0, 0.8)'
+                }}
+              >
+                {/* Isometric dot background */}
+                <IsometricDotBackground />
+                
+                {/* Game content */}
+                <div className="relative h-full p-6 flex items-center justify-center" style={{ zIndex: 10 }}>
+                  {/* Join game display */}
+                  <motion.div 
+                    className="relative text-center"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                  >
+                    <div 
+                      className="relative px-8 py-6 border-2 bg-black/80 backdrop-blur-sm"
+                      style={{
+                        borderColor: '#ec4899',
+                        borderRadius: '12px',
+                        boxShadow: '0 0 30px rgba(236, 72, 153, 0.5), inset 0 0 20px rgba(236, 72, 153, 0.1)'
+                      }}
+                    >
+                      {/* Corner decorations */}
+                      <div className="absolute top-1 left-1 w-3 h-3 border-l-2 border-t-2" style={{ borderColor: 'inherit' }}></div>
+                      <div className="absolute top-1 right-1 w-3 h-3 border-r-2 border-t-2" style={{ borderColor: 'inherit' }}></div>
+                      <div className="absolute bottom-1 left-1 w-3 h-3 border-l-2 border-b-2" style={{ borderColor: 'inherit' }}></div>
+                      <div className="absolute bottom-1 right-1 w-3 h-3 border-r-2 border-b-2" style={{ borderColor: 'inherit' }}></div>
+                      
+                      <motion.div
+                        className="text-4xl font-bold mb-4 text-center text-pink-400"
+                        style={{
+                          textShadow: '0 0 20px #ec4899, 0 0 40px #ec4899',
+                          fontFamily: 'monospace'
+                        }}
+                        animate={{
+                          textShadow: [
+                            '0 0 20px #ec4899, 0 0 40px #ec4899',
+                            '0 0 30px #ec4899, 0 0 60px #ec4899',
+                            '0 0 20px #ec4899, 0 0 40px #ec4899'
+                          ]
+                        }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        MURDER MYSTERY
+                      </motion.div>
+                      
+                      <div className="text-center text-sm font-semibold uppercase tracking-wider text-cyan-400 mb-4">
+                        READY TO JOIN
+                      </div>
+                      
+                      {/* Role icons display */}
+                      <div className="flex justify-center space-x-6 mb-4">
+                        <div className="text-green-400 text-center">
+                          <Users className="w-8 h-8 mx-auto mb-1" />
+                          <div className="text-xs">INNOCENT</div>
+                        </div>
+                        <div className="text-red-400 text-center">
+                          <Sword className="w-8 h-8 mx-auto mb-1" />
+                          <div className="text-xs">MURDERER</div>
+                        </div>
+                        <div className="text-blue-400 text-center">
+                          <Eye className="w-8 h-8 mx-auto mb-1" />
+                          <div className="text-xs">DETECTIVE</div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
             </div>
 
-            <button
-              onClick={joinGame}
-              disabled={!connected}
-              className="btn-primary"
-            >
-              Join Game
-            </button>
-          </motion.div>
+            {/* Controls */}
+            <div className="space-y-6">
+              <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-slate-700 space-y-6">
+                <h2 className="text-2xl font-bold text-white mb-4">Join a Game</h2>
+                <p className="text-gray-400 mb-6">
+                  Enter the lobby and get assigned a role. Work with or against other players to achieve your objective.
+                </p>
+                
+                <div className="space-y-4">
+                  {Object.entries(roles).map(([key, role]) => {
+                    const Icon = role.icon;
+                    return (
+                      <div key={key} className="bg-slate-700/50 p-4 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <Icon className={`w-6 h-6 ${role.color}`} />
+                          <div>
+                            <h3 className="text-white font-bold">{role.name}</h3>
+                            <p className="text-gray-400 text-sm">{role.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <motion.button
+                  onClick={joinGame}
+                  disabled={!connected}
+                  className="w-full btn-primary"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  🎮 Join Game
+                </motion.button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Waiting Room */}

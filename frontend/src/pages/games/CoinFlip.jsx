@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { Coins, DollarSign, RotateCcw } from 'lucide-react';
 import { useSocket } from '../../context/SocketContext';
 import FairVerifyModal from '../../components/FairVerifyModal';
+import AutoBetPanel from '../../components/auto-bet/AutoBetPanel';
+import { useAutoBet } from '../../hooks/useAutoBet';
 
 const CoinFlip = () => {
   const [betAmount, setBetAmount] = useState(10);
@@ -11,10 +13,21 @@ const CoinFlip = () => {
   const [result, setResult] = useState(null);
   const [fair, setFair] = useState(null);
   const [verifyOpen, setVerifyOpen] = useState(false);
+  const [showAutoBet, setShowAutoBet] = useState(false);
   const { socket, connected } = useSocket();
+  
+  const {
+    isAutoBetting,
+    autoBetStats,
+    startAutoBet,
+    stopAutoBet,
+    handleGameResult
+  } = useAutoBet('coinflip', (result, stats) => {
+    console.log('Auto-bet result:', result, stats);
+  });
 
   const flipCoin = () => {
-    if (!socket || !connected) return;
+    if (!socket || !connected || isAutoBetting) return;
     setIsFlipping(true);
     socket.emit('coinflip:play', { betAmount, selectedSide });
   };
@@ -25,10 +38,15 @@ const CoinFlip = () => {
       setResult(r);
       setFair(r.fair);
       setIsFlipping(false);
+      
+      // Handle auto-bet result
+      if (isAutoBetting) {
+        handleGameResult(r);
+      }
     };
     socket.on('coinflip:result', onRes);
     return () => socket.off('coinflip:result', onRes);
-  }, [socket]);
+  }, [socket, isAutoBetting, handleGameResult]);
 
   return (
     <div className="min-h-screen pt-8 pb-16">
@@ -90,13 +108,26 @@ const CoinFlip = () => {
                   </div>
                 </div>
 
-                <button
-                  onClick={flipCoin}
-                  disabled={isFlipping}
-                  className="w-full btn-primary"
-                >
-                  {isFlipping ? 'Flipping...' : 'Flip Coin'}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={flipCoin}
+                    disabled={isFlipping || isAutoBetting}
+                    className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isFlipping ? 'Flipping...' : 'Flip Coin'}
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowAutoBet(!showAutoBet)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      showAutoBet
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                    }`}
+                  >
+                    Auto
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -106,7 +137,9 @@ const CoinFlip = () => {
               <motion.div
                 animate={isFlipping ? { rotateY: 360 } : {}}
                 transition={{ duration: 1.2, repeat: isFlipping ? Infinity : 0 }}
-                className="w-32 h-32 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl font-bold text-white"
+                className={`w-32 h-32 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl font-bold text-white ${
+                  isAutoBetting ? 'ring-4 ring-blue-400 ring-opacity-50' : ''
+                }`}
               >
                 {isFlipping ? '?' : (result?.result || selectedSide).charAt(0).toUpperCase()}
               </motion.div>
@@ -115,6 +148,11 @@ const CoinFlip = () => {
                   <div className={`text-lg font-bold ${result.won ? 'text-green-400' : 'text-red-400'}`}>
                     {result.won ? `You Won $${(result.winnings).toFixed(2)}!` : `You Lost $${betAmount.toFixed(2)}`}
                   </div>
+                  {isAutoBetting && (
+                    <div className="mt-2 text-sm text-blue-400">
+                      Auto-bet: {autoBetStats.totalBets} bets | Profit: ${autoBetStats.profit.toFixed(2)}
+                    </div>
+                  )}
                   {fair && (
                     <button onClick={()=>setVerifyOpen(true)} className="mt-3 text-sm text-blue-400 hover:text-blue-300">Verify Fairness</button>
                   )}
@@ -123,6 +161,27 @@ const CoinFlip = () => {
             </div>
           </div>
         </div>
+        
+        {/* Auto-bet Panel */}
+        {showAutoBet && (
+          <div className="mt-8">
+            <AutoBetPanel
+              game="coinflip"
+              isGameActive={isFlipping}
+              onAutoBetStart={(config, betAmount) => {
+                const autoBetConfig = {
+                  ...config,
+                  gameParams: {
+                    selectedSide,
+                    betAmount
+                  }
+                };
+                startAutoBet(autoBetConfig);
+              }}
+              onAutoBetStop={stopAutoBet}
+            />
+          </div>
+        )}
       </div>
       <FairVerifyModal open={verifyOpen} onClose={()=>setVerifyOpen(false)} fair={fair} game={{ type: 'coinflip' }} />
     </div>

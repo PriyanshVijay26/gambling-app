@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 }
@@ -16,45 +16,191 @@
 
 body {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background: #000000;
   color: white;
   overflow-x: hidden;
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Harvester.gg Style Cards */
+.harvester-card {
+  @apply bg-gradient-to-br from-gray-900/80 to-gray-800/60 backdrop-blur-sm rounded-2xl border border-gray-700/50 transition-all duration-300 hover:border-gray-600/70 hover:shadow-2xl hover:shadow-blue-500/10;
+  backdrop-filter: blur(16px);
+}
+
+.harvester-card-premium {
+  @apply bg-gradient-to-br from-gray-900/90 to-gray-800/70 backdrop-blur-md rounded-2xl border border-amber-500/20 transition-all duration-300 hover:border-amber-400/40 hover:shadow-2xl hover:shadow-amber-500/10;
+  backdrop-filter: blur(20px);
 }
 
 .game-card {
-  @apply bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border border-slate-700 hover:border-primary-500 transition-all duration-300 transform hover:scale-105;
+  @apply harvester-card relative overflow-hidden;
 }
 
+.game-card::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 transition-opacity duration-300;
+}
+
+.game-card:hover::before {
+  @apply opacity-100;
+}
+
+/* Premium Button Styles */
 .btn-primary {
-  @apply bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-primary-500/25;
+  @apply relative inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl hover:shadow-blue-500/25 border border-blue-500/30;
+  background-image: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.btn-primary::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl opacity-0 transition-opacity duration-300;
+}
+
+.btn-primary:hover::before {
+  @apply opacity-20;
 }
 
 .btn-secondary {
-  @apply bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 border border-slate-600 hover:border-slate-500;
+  @apply relative inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-gray-700 to-gray-800 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 border border-gray-600/50 hover:border-gray-500/70 shadow-lg hover:shadow-xl;
+  min-height: 44px;
+  white-space: nowrap;
 }
 
-.glass-effect {
-  @apply bg-white bg-opacity-10 backdrop-blur-md border border-white border-opacity-20;
+.btn-ghost {
+  @apply px-6 py-3 bg-white/5 text-white font-medium rounded-xl border border-white/10 backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-white/20;
 }
 
-.neon-glow {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+/* Enhanced glassmorphism effects */
+.glass-card {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl;
+  backdrop-filter: blur(20px);
+}
+
+.glass-panel {
+  @apply bg-black/20 backdrop-blur-xl border border-white/5 rounded-xl;
+  backdrop-filter: blur(16px);
+}
+
+/* Sidebar/Panel Styles */
+.sidebar-panel {
+  @apply bg-gradient-to-b from-gray-900/50 to-gray-800/30 backdrop-blur-xl border border-gray-700/30 rounded-2xl p-6;
+  backdrop-filter: blur(20px);
+}
+
+/* Stats Card */
+.stats-card {
+  @apply harvester-card p-6 hover:scale-105 transition-all duration-300;
+}
+
+/* Navigation Styles */
+.nav-item {
+  @apply relative px-4 py-2 text-gray-300 font-medium rounded-xl transition-all duration-300 hover:text-white hover:bg-white/10;
+}
+
+.nav-item.active {
+  @apply text-white bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30;
+}
+
+/* Animated gradient backgrounds */
+.animated-gradient {
+  background: linear-gradient(-45deg, #1e40af, #7c3aed, #059669, #dc2626);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Hero Section */
+.hero-gradient {
+  background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.15) 0%, transparent 70%), 
+              radial-gradient(ellipse at 80% 20%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at 20% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+}
+
+/* Floating animation */
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+/* Pulse glow effect */
+.pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+  from { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+  to { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.3); }
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: rgba(0, 0, 0, 0.1);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Typography */
+.text-gradient {
+  @apply bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent;
+}
+
+/* Loading shimmer */
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .game-card {
+    @apply mx-2;
+  }
+  
+  .btn-primary, .btn-secondary {
+    @apply px-6 py-3 text-sm;
+    min-height: 44px;
+    font-size: 0.9rem;
+  }
+  
+  .harvester-card {
+    @apply mx-2 rounded-xl;
+  }
+  
+  /* Improve CTA button on mobile */
+  .mobile-cta-button {
+    @apply px-8 py-4 text-base;
+    min-width: 280px;
+    white-space: nowrap;
+  }
 }
