@@ -197,10 +197,39 @@ body {
     @apply mx-2 rounded-xl;
   }
   
+  /* Mobile Navbar Optimizations */
+  .nav-item {
+    @apply px-3 py-2 text-sm;
+  }
+  
+  /* Touch-friendly sizing */
+  .mobile-touch {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Mobile-specific sidebar */
+  .mobile-sidebar {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  
   /* Improve CTA button on mobile */
   .mobile-cta-button {
     @apply px-8 py-4 text-base;
     min-width: 280px;
     white-space: nowrap;
+  }
+}
+
+/* Safe area for mobile devices with notches */
+@supports (padding: max(0px)) {
+  .mobile-safe-area {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+  
+  .mobile-navbar-safe {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
   }
 }

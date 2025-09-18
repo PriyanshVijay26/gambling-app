@@ -53,32 +53,33 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="bg-black/90 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-20">
+    <nav className="bg-black/90 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50 mobile-navbar-safe">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mobile-safe-area">
+        <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Gamepad2 className="w-6 h-6 text-white" />
+            <Link to="/" className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <Gamepad2 className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-gradient">
+              <span className="text-lg sm:text-2xl font-bold text-gradient hidden xs:block">
                 GamePlatform
+              </span>
+              <span className="text-lg font-bold text-gradient xs:hidden">
+                GP
               </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden lg:flex items-center space-x-2">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`nav-item flex items-center space-x-2 ${
-                    isActive(item.href) ? 'active' : ''
-                  }`}
+                  className={`nav-item flex items-center space-x-2 ${isActive(item.href) ? 'active' : ''}`}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="font-medium">{item.name}</span>
@@ -116,86 +117,150 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* Connection Status */}
-            <div className="flex items-center space-x-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-2">
-              <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
-              <span className="text-sm text-gray-300">
-                {connected ? 'Connected' : 'Disconnected'}
-              </span>
-            </div>
+            {/* Connection Status & User */}
+            <div className="hidden lg:flex items-center space-x-3">
+              <div className="flex items-center space-x-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl px-3 py-2">
+                <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
+                <span className="text-xs text-gray-300">
+                  {connected ? 'Connected' : 'Disconnected'}
+                </span>
+              </div>
 
-            {/* Guest Auth */}
-            <button 
-              onClick={() => setAuthModalOpen(true)} 
-              className="flex items-center gap-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
-            >
-              {user?.avatar ? (
-                <img src={user.avatar} alt="avatar" className="w-8 h-8 rounded-lg" />
-              ) : (
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg" />
-              )}
-              <span className="font-medium">{user?.username || 'Set username'}</span>
-            </button>
+              <button 
+                onClick={() => setAuthModalOpen(true)} 
+                className="flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl px-3 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+              >
+                {user?.avatar ? (
+                  <img src={user.avatar} alt="avatar" className="w-6 h-6 rounded-lg" />
+                ) : (
+                  <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg" />
+                )}
+                <span className="font-medium text-sm">{user?.username || 'Set username'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="lg:hidden flex items-center space-x-2">
+            {/* Mobile User Avatar */}
+            <button 
+              onClick={() => setAuthModalOpen(true)} 
+              className="flex items-center bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-2"
+            >
+              {user?.avatar ? (
+                <img src={user.avatar} alt="avatar" className="w-6 h-6 rounded" />
+              ) : (
+                <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded" />
+              )}
+            </button>
+            
+            {/* Hamburger Menu */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-300 hover:text-white p-2"
+              className="text-gray-300 hover:text-white p-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg"
             >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation Overlay */}
       <motion.div
         initial={false}
-        animate={{ height: isOpen ? 'auto' : 0 }}
-        className="md:hidden overflow-hidden bg-dark-300 border-t border-slate-700"
+        animate={{ 
+          opacity: isOpen ? 1 : 0,
+          visibility: isOpen ? 'visible' : 'hidden'
+        }}
+        transition={{ duration: 0.2 }}
+        className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+        onClick={() => setIsOpen(false)}
+      />
+      
+      {/* Mobile Navigation Sidebar */}
+      <motion.div
+        initial={{ x: '100%' }}
+        animate={{ x: isOpen ? '0%' : '100%' }}
+        transition={{ type: 'tween', duration: 0.3 }}
+        className="lg:hidden fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-slate-900/95 backdrop-blur-xl border-l border-white/10 z-50 overflow-y-auto mobile-sidebar mobile-safe-area"
       >
-        <div className="px-4 py-4 space-y-2">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                onClick={() => setIsOpen(false)}
-                className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ${
-                  isActive(item.href)
-                    ? 'bg-primary-600 text-white'
-                    : 'text-gray-300 hover:text-white hover:bg-slate-700'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span className="font-medium">{item.name}</span>
-              </Link>
-            );
-          })}
+        <div className="p-4">
+          {/* Mobile Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <Gamepad2 className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-lg font-bold text-white">GamePlatform</span>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-gray-300 hover:text-white p-2"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
           
-          <div className="pt-2 border-t border-slate-700">
-            <div className="text-sm font-medium text-gray-400 px-3 py-2">Games</div>
-            {games.map((game) => {
+          {/* Connection Status */}
+          <div className="flex items-center space-x-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl px-3 py-2 mb-6">
+            <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
+            <span className="text-sm text-gray-300">
+              {connected ? 'Connected' : 'Disconnected'}
+            </span>
+          </div>
+
+          {/* Navigation Links */}
+          <div className="space-y-2 mb-6">
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Navigation</div>
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center space-x-3 px-3 py-3 rounded-xl transition-all duration-200 ${
+                    isActive(item.href)
+                      ? 'bg-blue-600/20 border border-blue-500/30 text-white'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{item.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+          
+          {/* Games Section */}
+          <div className="space-y-2">
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Games</div>
+            {games.slice(0, 6).map((game) => { // Show only first 6 games on mobile
               const Icon = game.icon;
               return (
                 <Link
                   key={game.name}
                   to={game.href}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+                  className={`flex items-center space-x-3 px-3 py-3 rounded-xl transition-all duration-200 ${
                     isActive(game.href)
-                      ? 'bg-primary-600 text-white'
-                      : 'text-gray-300 hover:text-white hover:bg-slate-700'
+                      ? 'bg-blue-600/20 border border-blue-500/30 text-white'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${game.color}`} />
+                  <Icon className={`w-5 h-5 ${game.color}`} />
                   <span className="font-medium">{game.name}</span>
                 </Link>
               );
             })}
+            
+            {games.length > 6 && (
+              <div className="text-center pt-2">
+                <button className="text-sm text-blue-400 hover:text-blue-300">
+                  View All Games ({games.length})
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
