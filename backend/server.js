@@ -67,31 +67,25 @@ let dataService;
 
 async function initializeDatabase() {
   try {
-    // Only try to connect to database if DATABASE_URL is provided (production)
-    // or if running in production mode
-    if (process.env.DATABASE_URL || process.env.NODE_ENV === 'production') {
+    // Only try to connect to database if DATABASE_URL is provided
+    if (process.env.DATABASE_URL) {
       database = new Database();
       await database.initialize();
       dataService = new DataService(database);
       console.log('✅ Database and data service initialized successfully');
     } else {
-      console.log('⚠️  Running in development mode without database');
+      console.log('⚠️  Running without database (in-memory mode)');
       console.log('   💡 Database features will be disabled');
-      console.log('   🚀 For production, set DATABASE_URL or NODE_ENV=production');
+      console.log('   🚀 To enable database: add PostgreSQL add-on and set DATABASE_URL');
       database = null;
       dataService = null;
     }
   } catch (error) {
-    if (process.env.NODE_ENV === 'production') {
-      console.error('❌ Failed to initialize database in production:', error);
-      process.exit(1);
-    } else {
-      console.warn('⚠️  Database connection failed in development mode');
-      console.log('   💡 Continuing without database - using in-memory storage');
-      console.log('   🔧 To use database: install PostgreSQL or set DATABASE_URL');
-      database = null;
-      dataService = null;
-    }
+    console.error('❌ Database connection failed:', error);
+    console.log('   💡 Continuing without database - using in-memory storage');
+    console.log('   🔧 To fix: check DATABASE_URL or add PostgreSQL add-on');
+    database = null;
+    dataService = null;
   }
 }
 
@@ -1465,7 +1459,7 @@ async function startServer() {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`🌐 Frontend URL: http://localhost:5173`);
       console.log(`🎲 Server seed hash: ${provablyFair.serverSeedHash.slice(0, 10)}...`);
-      console.log(`💾 Database: Connected and ready`);
+      console.log(`💾 Database: ${database ? 'Connected and ready' : 'Running in-memory mode'}`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
