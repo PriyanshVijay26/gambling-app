@@ -1,12 +1,12 @@
 # Netlify Configuration
 [build]
   base = "frontend"
-  publish = "frontend/dist"
+  publish = "dist"
   command = "npm run build"
 
 # Environment variables for production
 [build.environment]
-  VITE_SERVER_URL = "https://your-backend-app.onrender.com"
+  VITE_SERVER_URL = "https://gambling-app-backend.onrender.com"
   VITE_APP_ENV = "production"
 
 # Redirect rules for SPA
